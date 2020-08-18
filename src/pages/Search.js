@@ -12,46 +12,46 @@ class Search extends Component {
     breeds: [],
     results: [],
     employeeResults:[],
+    filteredEmployees:[],
     error: ""
   };
 
 
-  // When the component mounts, get a list of all available base breeds and update this.state.breeds
   componentDidMount() {
     API.getUser()
-    // .then(function(result){
-    //   console.log(result.data.results[0])
-    //   console.log(result.data.results[0].picture.thumbnail)
-    //   console.log(result.data.results[0].name.first +" "+ result.data.results[0].name.last)
-    //   console.log(result.data.results[0].phone)
-    //   console.log(result.data.results[0].dob.date)
 
-    //   // let peopleArray= result.data.results.map(function(currentEmployee){
-    //   //   return currentEmployee
-    //   // })
-    //   return this.setState({employeeResults:result.data.results})
-
-    //   // const doubledArray = originalArray.map(function(data) {
-    //   //   return data * 2;
-    //   // });
-      
-
-    // })
-
-    .then(result=> this.setState({employeeResults:result.data.results}))
-    // API.getBaseBreedsList()
-    //   .then(res => this.setState({ breeds: res.data.message }))
-    //   .catch(err => console.log(err));
+    .then(result=> this.setState({
+      employeeResults:result.data.results,
+      filteredEmployees:result.data.results
+    }))
   }
 
+  filterCell=()=>{
+    this.setState({filteredEmployees:     
+    this.state.employeeResults.sort((a, b) => (a.cell > b.cell) ? 1 : -1)
+     })
+  }
 
-   filterName=(result)=>{
-    var filterN= result.sort();
-    console.log(filterN)
-    this.setState({employeeResults:result.data.results})
-    return filterN;
-    
+  filterName=()=>{
+    this.setState({filteredEmployees:     
+    this.state.employeeResults.sort((a, b) => (a.name.first > b.name.first) ? 1 : -1)
+     })
+  }
 
+  filterDob=()=>{
+    this.setState({filteredEmployees:     
+    this.state.employeeResults.sort((a, b) => (a.dob.age < b.dob.age) ? 1 : -1)
+     })
+  }
+  filterMale=()=>{
+    this.setState({filteredEmployees:     
+    this.state.employeeResults.filter((a) => (a.gender === "male"))
+     })
+  }
+  filterFemale=()=>{
+    this.setState({filteredEmployees:     
+    this.state.employeeResults.filter((a) => (a.gender === "female"))
+     })
   }
 
   handleInputChange = event => {
@@ -60,20 +60,11 @@ class Search extends Component {
 
   handleFormSubmit = event => {
     event.preventDefault();
-    API.getDogsOfBreed(this.state.search)
-      .then(res => {
-        if (res.data.status === "error") {
-          throw new Error(res.data.message);
-        }
-        this.setState({ results: res.data.message, error: "" });
-      })
-      .catch(err => this.setState({ error: err.message }));
   };
   render() {
     return (
       <div>
         <Container style={{ minHeight: "80%" }}>
-          <h1 className="text-center">Search By Breed!</h1>
           <Alert
             type="danger"
             style={{ opacity: this.state.error ? 1 : 0, marginBottom: 10 }}
@@ -85,7 +76,14 @@ class Search extends Component {
             handleInputChange={this.handleInputChange}
             breeds={this.state.breeds}
           />
-          <EmployeeSearchResults employeeResults={this.state.employeeResults} />
+          <EmployeeSearchResults 
+          filterName={this.filterName}
+          filterCell={this.filterCell}
+          filterDob={this.filterDob}
+          filterMale={this.filterMale}
+          filterFemale={this.filterFemale}
+          employeeResults={this.state.filteredEmployees} 
+          />
           <SearchResults results={this.state.results} />
         </Container>
       </div>
